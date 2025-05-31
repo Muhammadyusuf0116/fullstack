@@ -1,0 +1,84 @@
+/**
+ * @swagger
+ * tags:
+ *   name: Mail
+ *   description: Usta tomonidan yuborilgan takliflar (offers)
+ */
+
+const express = require('express');
+const router = express.Router();
+const { verifyToken, isUsta, isUser } = require('../middlewares/authMiddleware');
+const mailController = require('../controller/mailController');
+
+/**
+ * @swagger
+ * /api/mail/send:
+ *   post:
+ *     summary: Usta tomonidan so'rovga taklif (mail) yuborish
+ *     tags: [Mail]
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - requestId
+ *               - price
+ *               - message
+ *             properties:
+ *               requestId:
+ *                 type: string
+ *               price:
+ *                 type: number
+ *               message:
+ *                 type: string
+ *     responses:
+ *       201:
+ *         description: Taklif yuborildi
+ */
+router.post('/send', verifyToken, isUsta, mailController.sendOffer);
+
+/**
+ * @swagger
+ * /api/mail/confirm/{mailId}:
+ *   put:
+ *     summary: Foydalanuvchi ustaning taklifini qabul qiladi
+ *     tags: [Mail]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - name: mailId
+ *         in: path
+ *         required: true
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: Taklif tasdiqlandi
+ */
+router.put('/confirm/:mailId', verifyToken, isUser, mailController.confirmOffer);
+
+/**
+ * @swagger
+ * /api/mail/reject/{mailId}:
+ *   delete:
+ *     summary: Foydalanuvchi ustaning taklifini rad etadi (o'chiriladi)
+ *     tags: [Mail]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - name: mailId
+ *         in: path
+ *         required: true
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: Taklif rad etildi
+ */
+router.delete('/reject/:mailId', verifyToken, isUser, mailController.rejectOffer);
+
+module.exports = router;

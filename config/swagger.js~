@@ -1,0 +1,32 @@
+const swaggerJsdoc = require('swagger-jsdoc');
+
+const options = {
+    definition: {
+        openapi: '3.0.0',
+        info: {
+            title: 'Dern-Support API',
+            version: '1.0.0',
+            description: 'Auth and support system API documentation'
+        },
+        servers: [
+            {
+                url: 'http://localhost:5000',
+                description: 'Local server'
+            }
+        ],
+    },
+    apis: ['./routes/*.js'], // faqat routes fayllardan o‘qiydi
+    components: {
+        securitySchemes: {
+            bearerAuth: {
+                type: 'http',
+                scheme: 'bearer',
+                bearerFormat: 'JWT'
+            }
+        }
+    }
+
+};
+
+const specs = swaggerJsdoc(options);
+module.exports = specs;

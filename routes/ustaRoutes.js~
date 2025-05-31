@@ -1,0 +1,175 @@
+
+
+/// USTA ROUTES WITH SWAGGER
+
+/**
+ * @swagger
+ * tags:
+ *   name: UstaRequests
+ *   description: Usta tomonidan boshqariladigan so'rovlar
+ */
+const express = require('express');
+const router = express.Router();
+const { verifyToken} = require('../middlewares/authMiddleware');
+const requestController = require('../controller/requestController');
+const mailController = require('../controller/mailController');
+
+/**
+ * @swagger
+ * /api/usta/requests/free:
+ *   get:
+ *     summary: Hali offer berilmagan so'rovlar
+ *     tags: [UstaRequests]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Bo'sh so'rovlar ro'yxati
+ */
+router.get('/requests/free', verifyToken, requestController.getFreeRequests);
+
+/**
+ * @swagger
+ * /api/usta/requests/my-offers:
+ *   get:
+ *     summary: Usta tomonidan berilgan takliflar
+ *     tags: [UstaRequests]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Berilgan takliflar
+ */
+router.get('/requests/my-offers', verifyToken, requestController.getMyOfferedRequests);
+
+/**
+ * @swagger
+ * /api/usta/requests/{id}/status:
+ *   patch:
+ *     summary: Tasdiqlangan ishning holatini yangilash (inprogress yoki completed)
+ *     tags: [UstaRequests]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - name: id
+ *         in: path
+ *         required: true
+ *         schema:
+ *           type: string
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - status
+ *             properties:
+ *               status:
+ *                 type: string
+ *                 enum: [inprogress, completed]
+ *     responses:
+ *       200:
+ *         description: Holat yangilandi
+ */
+router.patch('/requests/:id/status', verifyToken, requestController.updateRequestStatus);
+
+/**
+ * @swagger
+ * /api/usta/mails:
+ *   post:
+ *     summary: Usta tomonidan yangi offer yuborish
+ *     tags: [UstaRequests]
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - requestId
+ *               - price
+ *             properties:
+ *               requestId:
+ *                 type: string
+ *               price:
+ *                 type: number
+ *               message:
+ *                 type: string
+ *     responses:
+ *       201:
+ *         description: Taklif yuborildi
+ */
+router.post('/mails', verifyToken, mailController.sendOffer);
+const userController = require('../controller/userController');
+/**
+ * @swagger
+ * /api/user/me:
+ *   get:
+ *     summary: Kirgan foydalanuvchining profilini olish
+ *     tags: [User]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Profil ma'lumotlari
+ *       401:
+ *         description: Avtorizatsiya xatosi
+ *       500:
+ *         description: Server xatosi
+ */
+router.get('/me', verifyToken, userController.getMyProfile);
+/**
+ * @swagger
+ * /api/user/me:
+ *   get:
+ *     summary: Kirgan foydalanuvchining profilini olish
+ *     tags: [User]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Profil ma'lumotlari
+ *       401:
+ *         description: Avtorizatsiya xatosi
+ *       500:
+ *         description: Server xatosi
+ */
+router.put('/profile/update', verifyToken, userController.updateMyProfile);
+/**
+ * @swagger
+ * /api/user/profile/change-password:
+ *   post:
+ *     summary: Kirgan foydalanuvchi parolini yangilash
+ *     tags: [User]
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - currentPassword
+ *               - newPassword
+ *             properties:
+ *               currentPassword:
+ *                 type: string
+ *               newPassword:
+ *                 type: string
+ *     responses:
+ *       200:
+ *         description: Parol yangilandi
+ *       400:
+ *         description: Joriy parol noto‘g‘ri
+ *       401:
+ *         description: Ruxsat yo‘q
+ *       500:
+ *         description: Server xatosi
+ */
+router.put('/profile/change-password', verifyToken, userController.changePassword);
+
+module.exports = router;
